@@ -50,6 +50,22 @@ func TestServiceRetainsCheckedHerdrEnvironment(t *testing.T) {
 	}
 }
 
+func TestServiceRetainsSelfHostedOrigin(t *testing.T) {
+	t.Setenv("PAIRFOB_ORIGIN", "https://relay.example")
+	t.Setenv("PAIRFOB_DOWNLOAD_BASE", "https://relay.example/dl")
+	t.Setenv("PAIRFOB_STUN_URLS", "stun:relay.example:3478")
+	unit := systemdUnitFile("/tmp/pairfob", "/tmp/log", "/tmp")
+	for _, want := range []string{
+		`Environment=PAIRFOB_ORIGIN="https://relay.example"`,
+		`Environment=PAIRFOB_DOWNLOAD_BASE="https://relay.example/dl"`,
+		`Environment=PAIRFOB_STUN_URLS="stun:relay.example:3478"`,
+	} {
+		if !strings.Contains(unit, want+"\n") {
+			t.Fatalf("unit lacks %s:\n%s", want, unit)
+		}
+	}
+}
+
 func TestServiceRuntimeEscapesSystemdSpecifiersAndNewlines(t *testing.T) {
 	t.Setenv("HERDR_CONFIG_PATH", "/tmp/%h/config\nInjected=value")
 	body := systemdRuntimeEnvironment()
