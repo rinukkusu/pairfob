@@ -118,6 +118,21 @@ func TestUpdateBootCompletePersistsOnlyMatchingRunningVersion(t *testing.T) {
 		t.Fatal(restored.Status())
 	}
 }
+func TestRemoteUpdaterDownloadsFromConfiguredBase(t *testing.T) {
+	t.Setenv("PAIRFOB_DOWNLOAD_BASE", "https://relay.example/dl/")
+	if u := newRemoteUpdater(t.TempDir()); u.base != "https://relay.example/dl" {
+		t.Fatalf("base=%q", u.base)
+	}
+	t.Setenv("PAIRFOB_DOWNLOAD_BASE", "")
+	if u := newRemoteUpdater(t.TempDir()); u.base != defaultDownloadBase {
+		t.Fatalf("base=%q", u.base)
+	}
+	t.Setenv("PAIRFOB_DOWNLOAD_BASE", "ftp://relay.example/dl")
+	if u := newRemoteUpdater(t.TempDir()); u.available || u.base != "" {
+		t.Fatalf("invalid base kept updates available: base=%q available=%v", u.base, u.available)
+	}
+}
+
 func TestVersionOrderingRejectsDowngradesAndDevelopmentBuilds(t *testing.T) {
 	for _, pair := range [][2]string{{"1.0.0", "2.0.0"}, {"1.1.0", "dev"}, {"1.0.0", "1.0.0"}} {
 		if newerVersion(pair[0], pair[1]) {

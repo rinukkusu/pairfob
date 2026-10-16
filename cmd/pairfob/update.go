@@ -18,11 +18,8 @@ func updateCommand(args []string) error {
 	if len(args) != 0 {
 		return errors.New("usage: pairfob update")
 	}
-	base := strings.TrimRight(strings.TrimSpace(os.Getenv("PAIRFOB_DOWNLOAD_BASE")), "/")
-	if base == "" {
-		base = defaultDownloadBase
-	}
-	if err := allowedDownloadBase(base); err != nil {
+	base, err := downloadBaseFromEnv()
+	if err != nil {
 		return err
 	}
 	dest, err := resolvedExecutable()
@@ -30,6 +27,18 @@ func updateCommand(args []string) error {
 		return err
 	}
 	return updateExecutable(dest, base)
+}
+
+// downloadBaseFromEnv is PAIRFOB_DOWNLOAD_BASE, or the official site when unset.
+func downloadBaseFromEnv() (string, error) {
+	base := strings.TrimRight(strings.TrimSpace(os.Getenv("PAIRFOB_DOWNLOAD_BASE")), "/")
+	if base == "" {
+		base = defaultDownloadBase
+	}
+	if err := allowedDownloadBase(base); err != nil {
+		return "", err
+	}
+	return base, nil
 }
 
 func updateExecutable(dest, base string) error {
