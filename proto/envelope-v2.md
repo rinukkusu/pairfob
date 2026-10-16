@@ -39,7 +39,7 @@ No cookies. Enroll, pair-intent, rekey, and config responses use
 | Method | Path | Origin requirement | Behavior |
 | --- | --- | --- | --- |
 | GET | `/` `/assets/*` `/sw.js` `/manifest.webmanifest` `/pair` | - | PWA with the complete security-header set |
-| GET | `/api/config` | - | `{protocol:2, build,p2p}`; `p2p` is the direct-upgrade kill switch |
+| GET | `/api/config` | - | `{protocol:2, build,p2p, stun?}`; `p2p` is the direct-upgrade kill switch, optional `stun` replaces the default STUN URLs |
 | GET | `/v2/health` | - | `{ok:true, protocol:2}` |
 | POST | `/v2/enroll` | Absent or non-browser | Validate and echo the client-persisted `daemon_id` / `reconnect_token` |
 | POST | `/v2/pair-intent` | **Same-origin required** | Metered locator lookup; 10 requests per 10 minutes per IP |

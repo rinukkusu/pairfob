@@ -39,6 +39,7 @@ import { createReachability, type Reachability } from "./reachability";
 import { forgetSavedComputerCount } from "../lib/credentials";
 import type { OriginConfig } from "../lib/origin-config";
 import { recordConnectionDiagnostic } from "../lib/protocol/connection-diagnostics";
+import { setDirectStunUrls } from "../lib/protocol/ice-servers";
 import { bindOverlayOrigin } from "../shared/ui/overlay/origin";
 import { bindNotificationLinks } from "./notification-links";
 import { markAppPerformance, resetAppPerformance } from "../lib/performance-marks";
@@ -417,6 +418,7 @@ async function boot(generation: number, firstConfigRead?: Promise<ConfigRead>): 
     connectedRuntime()?.setLiveNetworkAvailable(true);
   }
   applyOriginConfig(read.config);
+  setDirectStunUrls(read.config.stun);
   bootRetryDelay = 1500;
   if (generation !== bootGeneration) return;
   const catalog = computers();

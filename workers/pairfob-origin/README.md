@@ -40,6 +40,10 @@ existing direct sessions continue until they reconnect. Old daemons reject
 negotiation and also stay on relay. A daemon can disable its adapter with
 `PAIRFOB_P2P=0` before restart.
 
+`STUN_URLS` (comma-separated `stun:`/`stuns:` URLs) replaces the PWA's default
+STUN server in `/api/config`; `none` sends `[]`, unset or empty leaves the
+field out. Daemons take the matching `PAIRFOB_STUN_URLS`.
+
 ## Open enroll
 
 The product path is grantless: `pairfob` journals `daemon_id` and a reconnect

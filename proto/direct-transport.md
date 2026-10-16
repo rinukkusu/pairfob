@@ -5,7 +5,10 @@ an ordered, reliable WebRTC DataChannel. The relay remains the mandatory
 signaling, authentication, and fallback path. `GET /api/config` advertises the
 global kill switch as `p2p`; a false value disables attempts.
 
-The browser gathers ICE candidates with `stun.cloudflare.com:3478`. Pairfob
+The browser gathers ICE candidates with `stun.cloudflare.com:3478` unless
+`/api/config` carries a `stun` list of `stun:`/`stuns:` URLs, which replaces
+it; an empty list gathers local candidates only. Pairfob reads the same choice
+from `PAIRFOB_STUN_URLS` (comma-separated; `none` for no STUN, empty keeps the default). Pairfob
 does not operate TURN and does not send TURN credentials. When NAT or firewall
 policy prevents a direct candidate pair, the established relay session keeps
 working without a user-visible disconnect.

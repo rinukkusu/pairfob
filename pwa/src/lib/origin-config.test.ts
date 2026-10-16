@@ -12,6 +12,14 @@ describe("origin config", () => {
     expect(() => parseOriginConfig({ protocol: 2 })).toThrow(ProtocolError);
   });
 
+  test("an optional STUN list must hold only stun: and stuns: URLs", () => {
+    expect(parseOriginConfig({ protocol: 2, build: "b", p2p: true, stun: ["stun:a.example:3478"] }))
+      .toEqual({ protocol: 2, build: "b", p2p: true, stun: ["stun:a.example:3478"] });
+    expect(parseOriginConfig({ protocol: 2, build: "b", stun: [] }).stun).toEqual([]);
+    expect(() => parseOriginConfig({ protocol: 2, build: "b", stun: "stun:a.example" })).toThrow(ProtocolError);
+    expect(() => parseOriginConfig({ protocol: 2, build: "b", stun: ["turn:a.example"] })).toThrow(ProtocolError);
+  });
+
   test("GET /api/config uses no-store and stores protocol", async () => {
     const calls: string[] = [];
     const config = await loadOriginConfig(async (input, init) => {

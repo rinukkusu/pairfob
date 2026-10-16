@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -24,10 +25,28 @@ type webRTCAcceptor struct {
 	configuration webrtc.Configuration
 }
 
+const defaultSTUNURL = "stun:stun.cloudflare.com:3478"
+
 func newWebRTCAcceptor() *webRTCAcceptor {
-	return &webRTCAcceptor{configuration: webrtc.Configuration{
-		ICEServers: []webrtc.ICEServer{{URLs: []string{"stun:stun.cloudflare.com:3478"}}},
-	}}
+	return &webRTCAcceptor{configuration: webrtc.Configuration{ICEServers: p2pICEServers(os.Getenv("PAIRFOB_STUN_URLS"))}}
+}
+
+// p2pICEServers reads PAIRFOB_STUN_URLS, a comma-separated list of STUN URLs.
+// Empty keeps the default server; "none" gathers host candidates only.
+func p2pICEServers(raw string) []webrtc.ICEServer {
+	if strings.TrimSpace(raw) == "none" {
+		return nil
+	}
+	var urls []string
+	for _, url := range strings.Split(raw, ",") {
+		if url = strings.TrimSpace(url); url != "" {
+			urls = append(urls, url)
+		}
+	}
+	if len(urls) == 0 {
+		urls = []string{defaultSTUNURL}
+	}
+	return []webrtc.ICEServer{{URLs: urls}}
 }
 
 func (a *webRTCAcceptor) Accept(

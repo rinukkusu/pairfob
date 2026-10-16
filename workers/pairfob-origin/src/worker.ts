@@ -46,7 +46,8 @@ export async function handleFetch(req: Request, env: Env): Promise<Response> {
   }
 
   if (path === "/api/config" && req.method === "GET") {
-    return jsonResponse(build, 200, { protocol: PROTOCOL, build, p2p: env.P2P_OPEN === "1" }, noStore());
+    const stun = stunUrls(env.STUN_URLS);
+    return jsonResponse(build, 200, { protocol: PROTOCOL, build, p2p: env.P2P_OPEN === "1", ...(stun && { stun }) }, noStore());
   }
 
   if (path === "/v2/enroll") return handleEnroll(req, env);
@@ -61,6 +62,16 @@ export async function handleFetch(req: Request, env: Env): Promise<Response> {
   if (path === "/v2/ws") return routeWs(req, env);
 
   return staticOrPlaceholder(req, env, build);
+}
+
+/**
+ * STUN servers the PWA gathers reflexive candidates with. Unset or empty
+ * leaves the field out so the PWA keeps its default; "none" advertises `[]`.
+ */
+export function stunUrls(raw: string | undefined): string[] | undefined {
+  if (raw?.trim() === "none") return [];
+  const urls = (raw ?? "").split(",").map((url) => url.trim()).filter((url) => /^stuns?:/.test(url));
+  return urls.length > 0 ? urls : undefined;
 }
 
 /**

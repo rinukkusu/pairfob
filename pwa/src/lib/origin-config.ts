@@ -4,7 +4,8 @@ import type { MuxProtocol } from "./protocol/mux.ts";
 import { fetchWithTimeout, type FetchLike } from "./request-timeout.ts";
 
 export type { MuxProtocol };
-export type OriginConfig = { protocol: MuxProtocol; build: string; p2p: boolean };
+/** `stun` is absent unless the origin overrides the default STUN server; `[]` means none. */
+export type OriginConfig = { protocol: MuxProtocol; build: string; p2p: boolean; stun?: string[] };
 
 export function parseOriginConfig(value: unknown): OriginConfig {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -20,7 +21,14 @@ export function parseOriginConfig(value: unknown): OriginConfig {
   if (record.p2p !== undefined && typeof record.p2p !== "boolean") {
     throw new ProtocolError("bad_message", t("err.originShape"));
   }
-  return { protocol: record.protocol, build: record.build, p2p: record.p2p === true };
+  const config: OriginConfig = { protocol: record.protocol, build: record.build, p2p: record.p2p === true };
+  if (record.stun !== undefined) {
+    if (!Array.isArray(record.stun) || !record.stun.every((url) => typeof url === "string" && /^stuns?:/.test(url))) {
+      throw new ProtocolError("bad_message", t("err.originShape"));
+    }
+    config.stun = [...record.stun];
+  }
+  return config;
 }
 
 /** Network failures may recover; invalid origin configuration must remain rejected. */

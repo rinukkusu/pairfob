@@ -2,6 +2,7 @@ import { b64url, hexToBytes } from "./bytes.ts";
 import { recordConnectionDiagnostic } from "./connection-diagnostics.ts";
 import { DataFrameChannel } from "./data-channel.ts";
 import { ProtocolError } from "./errors.ts";
+import { directIceServers } from "./ice-servers.ts";
 import { isRecord } from "./session-message.ts";
 
 const DIRECT_NEGOTIATION_MS = 8_000;
@@ -265,7 +266,7 @@ export async function createDirectOffer(signal?: AbortSignal): Promise<DirectOff
   const attemptId = newDirectAttemptId();
   let peer: RTCPeerConnection;
   try {
-    peer = new RTCPeerConnection({ iceServers: [{ urls: "stun:stun.cloudflare.com:3478" }] });
+    peer = new RTCPeerConnection({ iceServers: directIceServers() });
   } catch (error) {
     throw asDirectError(error, "offer", "P2P 初始化失败");
   }
