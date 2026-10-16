@@ -1,0 +1,41 @@
+// Self-hosted origin: `wrangler dev --local` behind a reverse proxy (deploy/vps).
+// No routes, no Analytics Engine; Durable Objects and D1 persist under --persist-to.
+{
+  "name": "pairfob-origin",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-26",
+  "compatibility_flags": ["nodejs_compat", "enable_request_signal", "request_signal_passthrough"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "BUILD": "selfhost",
+    "P2P_OPEN": "1",
+    "STUN_URLS": "stun:pairfob.bin-ary.de:3478"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pairfob",
+      "database_id": "00000000-0000-0000-0000-000000000001",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "DAEMON_ROOM", "class_name": "DaemonRoom" },
+      { "name": "PAIRING_INDEX", "class_name": "PairingIndex" }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DaemonRoom", "PairingIndex"]
+    }
+  ],
+  "assets": {
+    "directory": "./public-dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": true
+  }
+}
